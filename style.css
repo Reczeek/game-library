@@ -1,4 +1,12 @@
-#gameList{
+#gameCards {
     white-space: pre-line;
     display: flex;
+}
+
+#addGameSection {
+    display: none;
+}
+
+.gameCard button{
+    display: block;
 }
