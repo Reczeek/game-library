@@ -6,7 +6,7 @@ let games = [];
 
 loadScene(addGameSection)
 
-function addGame() {
+function addGame(form) {
     const gameName = document.getElementById("gameName").value;
     const gameGenre = document.getElementById("gameGenre").value;
     const gameStatus = document.getElementById("gameStatus").value;
@@ -21,6 +21,7 @@ function addGame() {
     };
     games.push(game)
     renderGames();
+    form.reset()
     loadScene(gameList) 
 };
 
@@ -33,11 +34,14 @@ function renderGames() {
         gameCard.textContent += "\n" + game.genre;
         gameCard.textContent += "\n" + game.status;
         gameCard.textContent += "\n" + game.rating;
+        const index = games.indexOf(game);
         const buttons = document.createElement("div")
         const editButton = document.createElement("button");
         editButton.textContent = "Edit";
+        editButton.addEventListener("click",() => editGame(game, games, index));
         const deleteButton = document.createElement("button");
         deleteButton.textContent = "Delete";
+        deleteButton.addEventListener("click",() => deleteGame(game, games, index));
         gameCards.appendChild(gameCard);
         gameCard.appendChild(buttons);
         buttons.appendChild(editButton);
@@ -55,3 +59,18 @@ function loadScene(scene) {
         addGameSection.style.display = "none";
     }
 }
+
+function editGame(game, games, index) {
+    loadScene(addGameSection);
+    document.getElementById("gameName").value = game.name;
+    document.getElementById("gameGenre").value = game.genre;
+    document.getElementById("gameStatus").value = game.status;
+    document.getElementById("gameRating").value = game.rating;
+    games.splice(index, 1);
+    renderGames()
+}
+
+function deleteGame(game, games, index) {
+    games.splice(index, 1);
+    renderGames()
+};
