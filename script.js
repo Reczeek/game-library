@@ -4,7 +4,14 @@ const addGameSection = document.getElementById("addGameSection");
 const gameCards = document.getElementById("gameCards")
 let games = [];
 
-loadScene(addGameSection)
+loadGames();
+
+if (games.length === 0) {
+    loadScene(addGameSection)
+} else {
+    renderGames();
+    loadScene(gameList);
+}
 
 function addGame(form) {
     const gameName = document.getElementById("gameName").value;
@@ -20,6 +27,7 @@ function addGame(form) {
         addGameDate: date1
     };
     games.push(game)
+    saveGames(games)
     renderGames();
     form.reset()
     loadScene(gameList) 
@@ -67,10 +75,24 @@ function editGame(game, games, index) {
     document.getElementById("gameStatus").value = game.status;
     document.getElementById("gameRating").value = game.rating;
     games.splice(index, 1);
+    saveGames(games)
     renderGames()
 }
 
 function deleteGame(game, games, index) {
     games.splice(index, 1);
+    saveGames(games)
     renderGames()
 };
+
+function saveGames(games) {
+    const save = JSON.stringify(games);
+    localStorage.setItem("games", save);
+}
+
+function loadGames() {
+    const save = localStorage.getItem("games");
+    if (save != null) {
+        games = JSON.parse(save);
+    }
+}
