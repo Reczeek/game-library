@@ -59,6 +59,13 @@
             </form>
         </div>
         <div id="gameList">
+            <select id="filter">
+                <option value="all" selected>All</option>
+                <option value="backlog">Backlog</option>
+                <option value="playing">Playing</option>
+                <option value="completed">Completed</option>
+                <option value="dropped">Dropped</option>
+            </select>
             <div id="gameCards"></div>
             <button id="addGameSectionButton" onclick="loadScene(addGameSection)">Add game</button>
         </div>
