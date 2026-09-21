@@ -3,6 +3,7 @@ const gameList = document.getElementById("gameList");
 const addGameSection = document.getElementById("addGameSection");
 const gameCards = document.getElementById("gameCards");
 const gameStatusFilter = document.getElementById("filter");
+const gameSearch = document.getElementById("gameSearch");
 
 let games = [];
 
@@ -11,6 +12,10 @@ gameStatusFilter.value = "all";
 
 gameStatusFilter.addEventListener("change", () => {
     filterGames(gameStatusFilter.value);
+});
+
+gameSearch.addEventListener("input", () => {
+    searchGames(gameSearch.value);
 });
 
 if (games.length === 0) {
@@ -128,4 +133,12 @@ function filterGames(status) {
     });
 
     renderGames(filteredGames);
+}
+
+function searchGames(search) {
+    const searchedGames = games.filter(game => {
+        return game.name.toLowerCase().includes(search.toLowerCase());
+    });
+
+    renderGames(searchedGames);
 }
