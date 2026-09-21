@@ -11,11 +11,11 @@ loadGames();
 gameStatusFilter.value = "all";
 
 gameStatusFilter.addEventListener("change", () => {
-    filterGames(gameStatusFilter.value);
+    updateGames();
 });
 
 gameSearch.addEventListener("input", () => {
-    searchGames(gameSearch.value);
+    updateGames();
 });
 
 if (games.length === 0) {
@@ -141,4 +141,15 @@ function searchGames(search) {
     });
 
     renderGames(searchedGames);
+}
+
+function updateGames() {
+    const status = gameStatusFilter.value;
+    const search = gameSearch.value;
+
+    const filteredGames = games.filter(game => {
+         return (status === "all" || game.status === status) && game.name.toLowerCase().includes(search.toLowerCase());
+    });
+
+    renderGames(filteredGames);
 }
