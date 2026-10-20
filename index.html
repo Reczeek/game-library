@@ -1,92 +1,138 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <link rel="stylesheet" href="style.css">
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Game Library</title>
+        <meta name="description" content="A personal game collection tracker.">
+        <title>Game Library | Personal Collection</title>
+        <link rel="stylesheet" href="style.css">
     </head>
     <body>
-        <header id="title">
-            <h1>Game Library</h1>
-        </header>
-        <div id="addGameSection">
-            <form id="gameForm">
-                <div>
-                    <label for="gameName">Game name:</label>
-                    <input type="text" id="gameName" required>
+        <div class="app-shell">
+            <header class="app-header">
+                <div class="brand">
+                    <div class="brand-mark" aria-hidden="true">◆</div>
+                    <div>
+                        <p class="eyebrow">PERSONAL COLLECTION</p>
+                        <h1>GAME <span>LIBRARY</span></h1>
+                        <p class="subtitle">Your personal gaming collection</p>
+                    </div>
                 </div>
-                <div>
-                    <label for="gameGenre">Genre:</label>
-                    <select id="gameGenre" required>
-                        <option value="">Select genre</option>
-                        <option value="action">Action</option>
-                        <option value="adventure">Adventure</option>
-                        <option value="rpg">RPG</option>
-                        <option value="strategy">Strategy</option>
-                        <option value="puzzle">Puzzle</option>
-                        <option value="sport">Sport</option>
-                        <option value="racing">Racing</option>
-                        <option value="simulation">Simulation</option>
-                        <option value="horror">Horror</option>
-                        <option value="casual">Casual</option>
-                        <option value="metroidvania">Metroidvania</option>
-                        <option value="fps">FPS</option>
-                        <option value="moba">MOBA</option>
-                        <option value="rts">RTS</option>
-                        <option value="platformer">Platformer</option>
-                        <option value="fighting">Fighting</option>
-                        <option value="indie">Indie</option>
-                        <option value="survival">Survival</option>
-                        <option value="sandbox">Sandbox</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="gameStatus">Status:</label>
-                    <select id="gameStatus" required>
-                        <option value="">Select status</option>
-                        <option value="backlog">Backlog</option>
-                        <option value="playing">Playing</option>
-                        <option value="completed">Completed</option>
-                        <option value="dropped">Dropped</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="gameRating">Rating:</label>
-                    <input type="number" id="gameRating" value="0" min="1" max="10" required>
-                </div>
-                <button type="button" id="addGameButton" onclick="addGame(form)">Add game</button>
-            </form>
-        </div>
-        <div id="gameList">
-            <input type="text" id="gameSearch" placeholder="Search game...">
-            <select id="filter">
-                <option value="all" selected>All</option>
-                <option value="backlog">Backlog</option>
-                <option value="playing">Playing</option>
-                <option value="completed">Completed</option>
-                <option value="dropped">Dropped</option>
-            </select>
-            <select id="sort">
-                <option value="last">Last added</option>
-                <option value="oldest">Oldest</option>
-                <option value="az">A-Z</option>
-                <option value="za">Z-A</option>
-                <option value="best">Best rated</option>
-                <option value="worst">Worst rated</option>
-            </select>
+                <button class="button button-primary header-action" id="addGameSectionButton" type="button">
+                    <span aria-hidden="true">+</span> Add game
+                </button>
+            </header>
 
-            <section id="statistics">
-                <h2>Statystyki biblioteki</h2>
+            <main>
+                <section id="statistics" class="stats-grid" aria-label="Library statistics">
+                    <article class="stat-card">
+                        <div class="stat-icon violet" aria-hidden="true">▦</div>
+                        <div><p>Total games</p><strong id="totalGames">0</strong></div>
+                    </article>
+                    <article class="stat-card">
+                        <div class="stat-icon green" aria-hidden="true">✓</div>
+                        <div><p>Completed</p><strong id="completedGames">0</strong></div>
+                    </article>
+                    <article class="stat-card">
+                        <div class="stat-icon blue" aria-hidden="true">▶</div>
+                        <div><p>Currently playing</p><strong id="playingGames">0</strong></div>
+                    </article>
+                    <article class="stat-card">
+                        <div class="stat-icon amber" aria-hidden="true">◷</div>
+                        <div><p>Backlog</p><strong id="backlogGames">0</strong></div>
+                    </article>
+                    <article class="stat-card">
+                        <div class="stat-icon pink" aria-hidden="true">★</div>
+                        <div><p>Average rating</p><strong id="averageRating">No rating</strong></div>
+                    </article>
+                </section>
 
-                <p>Wszystkie gry: <span id="totalGames">0</span></p>
-                <p>Ukończone: <span id="completedGames">0</span></p>
-                <p>W trakcie: <span id="playingGames">0</span></p>
-                <p>Do ogrania: <span id="backlogGames">0</span></p>
-                <p>Średnia ocena: <span id="averageRating">0/10</span></p>
-            </section>
-            <div id="gameCards"></div>
-            <button id="addGameSectionButton" onclick="loadScene(addGameSection)">Add game</button>
+                <section id="addGameSection" class="panel form-panel" aria-labelledby="formTitle">
+                    <div class="section-heading">
+                        <div>
+                            <p class="eyebrow">COLLECTION ENTRY</p>
+                            <h2 id="formTitle">Add a new game</h2>
+                        </div>
+                        <button class="icon-button" id="cancelGameButton" type="button" aria-label="Close form">×</button>
+                    </div>
+                    <form id="gameForm">
+                        <div class="form-grid">
+                            <div class="field field-wide">
+                                <label for="gameName">Game name</label>
+                                <input type="text" id="gameName" placeholder="e.g. Hades" required>
+                            </div>
+                            <div class="field">
+                                <label for="gameGenre">Genre</label>
+                                <select id="gameGenre" required>
+                                    <option value="">Select genre</option>
+                                    <option value="action">Action</option><option value="adventure">Adventure</option>
+                                    <option value="rpg">RPG</option><option value="strategy">Strategy</option>
+                                    <option value="puzzle">Puzzle</option><option value="sport">Sport</option>
+                                    <option value="racing">Racing</option><option value="simulation">Simulation</option>
+                                    <option value="horror">Horror</option><option value="casual">Casual</option>
+                                    <option value="metroidvania">Metroidvania</option><option value="fps">FPS</option>
+                                    <option value="moba">MOBA</option><option value="rts">RTS</option>
+                                    <option value="platformer">Platformer</option><option value="fighting">Fighting</option>
+                                    <option value="indie">Indie</option><option value="survival">Survival</option>
+                                    <option value="sandbox">Sandbox</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label for="gameStatus">Status</label>
+                                <select id="gameStatus" required>
+                                    <option value="">Select status</option>
+                                    <option value="backlog">Backlog</option><option value="playing">Playing</option>
+                                    <option value="completed">Completed</option><option value="dropped">Dropped</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label for="gameRating">Rating <span>(1–10)</span></label>
+                                <input type="number" id="gameRating" value="1" min="1" max="10" required>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button class="button button-secondary" id="cancelFormButton" type="button">Cancel</button>
+                            <button class="button button-primary" id="addGameButton" type="submit">Add game</button>
+                        </div>
+                    </form>
+                </section>
+
+                <section id="gameList" aria-labelledby="libraryTitle">
+                    <div class="list-heading">
+                        <div>
+                            <p class="eyebrow">YOUR LIBRARY</p>
+                            <h2 id="libraryTitle">All games</h2>
+                        </div>
+                        <span class="result-count" id="resultCount">0 games</span>
+                    </div>
+                    <div class="toolbar panel">
+                        <label class="search-box" for="gameSearch">
+                            <span aria-hidden="true">⌕</span>
+                            <input type="search" id="gameSearch" placeholder="Search your collection..." autocomplete="off">
+                        </label>
+                        <div class="filter-tabs" role="group" aria-label="Filter games by status">
+                            <button class="filter-tab active" type="button" data-filter="all">All</button>
+                            <button class="filter-tab" type="button" data-filter="backlog">Backlog</button>
+                            <button class="filter-tab" type="button" data-filter="playing">Playing</button>
+                            <button class="filter-tab" type="button" data-filter="completed">Completed</button>
+                            <button class="filter-tab" type="button" data-filter="dropped">Dropped</button>
+                        </div>
+                        <label class="sort-box" for="sort">Sort by
+                            <select id="sort">
+                                <option value="last">Last added</option><option value="oldest">Oldest</option>
+                                <option value="az">A-Z</option><option value="za">Z-A</option>
+                                <option value="best">Best rated</option><option value="worst">Worst rated</option>
+                            </select>
+                        </label>
+                        <select id="filter" class="visually-hidden" aria-hidden="true" tabindex="-1">
+                            <option value="all">All</option><option value="backlog">Backlog</option>
+                            <option value="playing">Playing</option><option value="completed">Completed</option><option value="dropped">Dropped</option>
+                        </select>
+                    </div>
+                    <div id="gameCards" class="game-grid"></div>
+                </section>
+            </main>
+            <footer><span class="footer-dot"></span> Your library, your journey.</footer>
         </div>
         <script src="script.js"></script>
     </body>

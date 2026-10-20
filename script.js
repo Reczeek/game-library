@@ -5,222 +5,156 @@ const gameCards = document.getElementById("gameCards");
 const gameStatusFilter = document.getElementById("filter");
 const gameSearch = document.getElementById("gameSearch");
 const gameSort = document.getElementById("sort");
-
-gameSort.addEventListener("change", () => {
-    sortGames(gameSort.value);
-});
+const formTitle = document.getElementById("formTitle");
+const addGameButton = document.getElementById("addGameButton");
+const resultCount = document.getElementById("resultCount");
 
 let games = [];
+let editingIndex = null;
 
 loadGames();
 gameStatusFilter.value = "all";
 gameSort.value = "last";
-sortGames(gameSort.value);
 
-gameStatusFilter.addEventListener("change", () => {
-    updateGames();
+document.querySelectorAll(".filter-tab").forEach(button => {
+    button.addEventListener("click", () => {
+        document.querySelectorAll(".filter-tab").forEach(tab => tab.classList.remove("active"));
+        button.classList.add("active");
+        gameStatusFilter.value = button.dataset.filter;
+        updateGames();
+    });
 });
 
-gameSearch.addEventListener("input", () => {
-    updateGames();
-});
+gameSort.addEventListener("change", updateGames);
+gameStatusFilter.addEventListener("change", updateGames);
+gameSearch.addEventListener("input", updateGames);
+form.addEventListener("submit", addGame);
+document.getElementById("addGameSectionButton").addEventListener("click", () => openForm());
+document.getElementById("cancelGameButton").addEventListener("click", closeForm);
+document.getElementById("cancelFormButton").addEventListener("click", closeForm);
 
 if (games.length === 0) {
-    loadScene(addGameSection);
+    renderGames([]);
+    openForm();
 } else {
-    sortGames(gameSort.value);
-    loadScene(gameList);
+    closeForm();
+    updateGames();
 }
-
 
 function updateStatistics() {
-    const totalGames = games.length;
+    const completed = games.filter(game => game.status === "completed").length;
+    const playing = games.filter(game => game.status === "playing").length;
+    const backlog = games.filter(game => game.status === "backlog").length;
+    const rated = games.filter(game => Number.isFinite(game.rating) && game.rating >= 1 && game.rating <= 10);
+    const average = rated.length ? rated.reduce((sum, game) => sum + game.rating, 0) / rated.length : 0;
 
-    const completedGames = games.filter(
-        game => game.status === "completed"
-    ).length;
-
-    const playingGames = games.filter(
-        game => game.status === "playing"
-    ).length;
-
-    const backlogGames = games.filter(
-        game => game.status === "backlog"
-    ).length;
-
-    const ratedGames = games.filter(
-        game => Number.isFinite(game.rating) && game.rating >= 1 && game.rating <= 10
-    );
-
-    const averageRating = ratedGames.length > 0
-        ? ratedGames.reduce((sum, game) => sum + game.rating, 0) / ratedGames.length
-        : 0;
-
-    document.getElementById("totalGames").textContent = totalGames;
-    document.getElementById("completedGames").textContent = completedGames;
-    document.getElementById("playingGames").textContent = playingGames;
-    document.getElementById("backlogGames").textContent = backlogGames;
-    document.getElementById("averageRating").textContent =
-        ratedGames.length > 0 ? `${averageRating.toFixed(1)}/10` : "Brak ocen";
+    document.getElementById("totalGames").textContent = games.length;
+    document.getElementById("completedGames").textContent = completed;
+    document.getElementById("playingGames").textContent = playing;
+    document.getElementById("backlogGames").textContent = backlog;
+    document.getElementById("averageRating").textContent = rated.length ? `${average.toFixed(1)}/10` : "No rating";
 }
 
-
-function addGame() {
-    const gameName = document.getElementById("gameName").value;
-    const gameGenre = document.getElementById("gameGenre").value;
-    const gameStatus = document.getElementById("gameStatus").value;
-    const gameRating = parseInt(document.getElementById("gameRating").value);
-
-    const date1 = Date.now();
-
+function addGame(event) {
+    event.preventDefault();
     const game = {
-        name: gameName,
-        genre: gameGenre,
-        status: gameStatus,
-        rating: gameRating,
-        addGameDate: date1
+        name: document.getElementById("gameName").value.trim(),
+        genre: document.getElementById("gameGenre").value,
+        status: document.getElementById("gameStatus").value,
+        rating: parseInt(document.getElementById("gameRating").value, 10),
+        addGameDate: editingIndex === null ? Date.now() : games[editingIndex].addGameDate
     };
 
-    games.push(game);
-    saveGames(games);
-    renderGames(games);
+    if (editingIndex === null) games.push(game);
+    else games[editingIndex] = game;
+
+    saveGames();
     form.reset();
-    loadScene(gameList);
+    editingIndex = null;
+    closeForm();
+    updateGames();
 }
 
 function renderGames(gameArray) {
     gameCards.innerHTML = "";
+    resultCount.textContent = `${gameArray.length} ${gameArray.length === 1 ? "game" : "games"}`;
 
-    for (const game of gameArray) {
-        const gameCard = document.createElement("div");
-        gameCard.className = "gameCard";
+    if (gameArray.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "empty-state";
+        empty.innerHTML = `<div class="empty-state-icon">✦</div><h3>${games.length ? "No games found" : "Your library is empty"}</h3><p>${games.length ? "Try changing your search or filters." : "Add your first game to start building your collection."}</p>`;
+        gameCards.appendChild(empty);
+        updateStatistics();
+        return;
+    }
 
-        gameCard.textContent += "\n" + game.name;
-        gameCard.textContent += "\n" + game.genre;
-        gameCard.textContent += "\n" + game.status;
-        gameCard.textContent += "\n" + game.rating;
-
+    gameArray.forEach(game => {
         const index = games.indexOf(game);
-
-        const buttons = document.createElement("div");
-
-        const editButton = document.createElement("button");
-        editButton.textContent = "Edit";
-        editButton.addEventListener("click", () => editGame(game, games, index));
-
-        const deleteButton = document.createElement("button");
-        deleteButton.textContent = "Delete";
-        deleteButton.addEventListener("click", () => deleteGame(game, games, index));
-
-        gameCards.appendChild(gameCard);
-        gameCard.appendChild(buttons);
-        buttons.appendChild(editButton);
-        buttons.appendChild(deleteButton);
-    }
+        const card = document.createElement("article");
+        card.className = "game-card";
+        card.innerHTML = `
+            <div class="card-top"><div><h3></h3><p class="genre"></p></div><span class="status-badge status-${game.status}">${game.status}</span></div>
+            <div class="card-meta"><span class="meta-label">Rating</span><span class="rating">★ ${game.rating}<span>/ 10</span></span></div>
+            <div class="card-actions"><button class="card-action edit" type="button">Edit</button><button class="card-action delete" type="button">Delete</button></div>`;
+        card.querySelector("h3").textContent = game.name;
+        card.querySelector(".genre").textContent = game.genre;
+        card.querySelector(".edit").addEventListener("click", () => editGame(index));
+        card.querySelector(".delete").addEventListener("click", () => deleteGame(index));
+        gameCards.appendChild(card);
+    });
     updateStatistics();
-}
-
-function loadScene(scene) {
-    if (scene == addGameSection) {
-        addGameSection.style.display = "block";
-        gameList.style.display = "none";
-    }
-
-    if (scene == gameList) {
-        gameList.style.display = "block";
-        addGameSection.style.display = "none";
-    }
-}
-
-function editGame(game, games, index) {
-    loadScene(addGameSection);
-
-    document.getElementById("gameName").value = game.name;
-    document.getElementById("gameGenre").value = game.genre;
-    document.getElementById("gameStatus").value = game.status;
-    document.getElementById("gameRating").value = game.rating;
-
-    games.splice(index, 1);
-    saveGames(games);
-    renderGames(games);
-}
-
-function deleteGame(game, games, index) {
-    games.splice(index, 1);
-    saveGames(games);
-    renderGames(games);
-}
-
-function saveGames(games) {
-    const save = JSON.stringify(games);
-    localStorage.setItem("games", save);
-}
-
-function loadGames() {
-    const save = localStorage.getItem("games");
-
-    if (save != null) {
-        games = JSON.parse(save);
-    }
-}
-
-function filterGames(status) {
-    const filteredGames = games.filter(game => {
-        if (status === "all") {
-            return true;
-        }
-
-        return game.status === status;
-    });
-
-    renderGames(filteredGames);
-}
-
-function searchGames(search) {
-    const searchedGames = games.filter(game => {
-        return game.name.toLowerCase().includes(search.toLowerCase());
-    });
-
-    renderGames(searchedGames);
 }
 
 function updateGames() {
     const status = gameStatusFilter.value;
-    const search = gameSearch.value;
-
-    const filteredGames = games.filter(game => {
-        return (status === "all" || game.status === status) && game.name.toLowerCase().includes(search.toLowerCase());
-    });
-
-    renderGames(filteredGames);
+    const search = gameSearch.value.trim().toLowerCase();
+    const filtered = games.filter(game => (status === "all" || game.status === status) && game.name.toLowerCase().includes(search));
+    const sorted = [...filtered];
+    const sortType = gameSort.value;
+    if (sortType === "last") sorted.sort((a, b) => b.addGameDate - a.addGameDate);
+    if (sortType === "oldest") sorted.sort((a, b) => a.addGameDate - b.addGameDate);
+    if (sortType === "az") sorted.sort((a, b) => a.name.localeCompare(b.name));
+    if (sortType === "za") sorted.sort((a, b) => b.name.localeCompare(a.name));
+    if (sortType === "best") sorted.sort((a, b) => b.rating - a.rating);
+    if (sortType === "worst") sorted.sort((a, b) => a.rating - b.rating);
+    renderGames(sorted);
 }
 
-function sortGames(sortType) {
-    const sortedGames = [...games];
+function openForm(game = null, index = null) {
+    editingIndex = index;
+    formTitle.textContent = game ? "Edit game" : "Add a new game";
+    addGameButton.textContent = game ? "Save changes" : "Add game";
+    if (game) {
+        document.getElementById("gameName").value = game.name;
+        document.getElementById("gameGenre").value = game.genre;
+        document.getElementById("gameStatus").value = game.status;
+        document.getElementById("gameRating").value = game.rating;
+    } else form.reset();
+    addGameSection.classList.add("is-visible");
+    gameList.style.display = "none";
+    document.getElementById("gameName").focus();
+}
 
-    if (sortType === "last") {
-        sortedGames.sort((a, b) => b.addGameDate - a.addGameDate);
+function closeForm() {
+    editingIndex = null;
+    addGameSection.classList.remove("is-visible");
+    gameList.style.display = "block";
+}
+
+function editGame(index) { openForm(games[index], index); }
+
+function deleteGame(index) {
+    games.splice(index, 1);
+    saveGames();
+    updateGames();
+}
+
+function saveGames() { localStorage.setItem("games", JSON.stringify(games)); }
+
+function loadGames() {
+    const saved = localStorage.getItem("games");
+    if (saved) {
+        try { games = JSON.parse(saved); }
+        catch (error) { console.error("Unable to load saved games.", error); }
     }
-
-    else if (sortType === "oldest") {
-        sortedGames.sort((a, b) => a.addGameDate - b.addGameDate);
-    }
-
-    else if (sortType === "az") {
-        sortedGames.sort((a, b) => a.name.localeCompare(b.name));
-    }
-
-    else if (sortType === "za") {
-        sortedGames.sort((a, b) => b.name.localeCompare(a.name));
-    }
-
-    else if (sortType === "best") {
-        sortedGames.sort((a, b) => b.rating - a.rating);
-    }
-
-    else if (sortType === "worst") {
-        sortedGames.sort((a, b) => a.rating - b.rating);
-    }
-
-    renderGames(sortedGames);
 }
