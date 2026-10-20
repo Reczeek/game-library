@@ -4,11 +4,18 @@ const addGameSection = document.getElementById("addGameSection");
 const gameCards = document.getElementById("gameCards");
 const gameStatusFilter = document.getElementById("filter");
 const gameSearch = document.getElementById("gameSearch");
+const gameSort = document.getElementById("sort");
+
+gameSort.addEventListener("change", () => {
+    sortGames(gameSort.value);
+});
 
 let games = [];
 
 loadGames();
 gameStatusFilter.value = "all";
+gameSort.value = "last";
+sortGames(gameSort.value);
 
 gameStatusFilter.addEventListener("change", () => {
     updateGames();
@@ -21,7 +28,7 @@ gameSearch.addEventListener("input", () => {
 if (games.length === 0) {
     loadScene(addGameSection);
 } else {
-    renderGames(games);
+    sortGames(gameSort.value);
     loadScene(gameList);
 }
 
@@ -148,8 +155,38 @@ function updateGames() {
     const search = gameSearch.value;
 
     const filteredGames = games.filter(game => {
-         return (status === "all" || game.status === status) && game.name.toLowerCase().includes(search.toLowerCase());
+        return (status === "all" || game.status === status) && game.name.toLowerCase().includes(search.toLowerCase());
     });
 
     renderGames(filteredGames);
+}
+
+function sortGames(sortType) {
+    const sortedGames = [...games];
+
+    if (sortType === "last") {
+        sortedGames.sort((a, b) => b.addGameDate - a.addGameDate);
+    }
+
+    else if (sortType === "oldest") {
+        sortedGames.sort((a, b) => a.addGameDate - b.addGameDate);
+    }
+
+    else if (sortType === "az") {
+        sortedGames.sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    else if (sortType === "za") {
+        sortedGames.sort((a, b) => b.name.localeCompare(a.name));
+    }
+
+    else if (sortType === "best") {
+        sortedGames.sort((a, b) => b.rating - a.rating);
+    }
+
+    else if (sortType === "worst") {
+        sortedGames.sort((a, b) => a.rating - b.rating);
+    }
+
+    renderGames(sortedGames);
 }
