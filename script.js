@@ -32,6 +32,39 @@ if (games.length === 0) {
     loadScene(gameList);
 }
 
+
+function updateStatistics() {
+    const totalGames = games.length;
+
+    const completedGames = games.filter(
+        game => game.status === "completed"
+    ).length;
+
+    const playingGames = games.filter(
+        game => game.status === "playing"
+    ).length;
+
+    const backlogGames = games.filter(
+        game => game.status === "backlog"
+    ).length;
+
+    const ratedGames = games.filter(
+        game => Number.isFinite(game.rating) && game.rating >= 1 && game.rating <= 10
+    );
+
+    const averageRating = ratedGames.length > 0
+        ? ratedGames.reduce((sum, game) => sum + game.rating, 0) / ratedGames.length
+        : 0;
+
+    document.getElementById("totalGames").textContent = totalGames;
+    document.getElementById("completedGames").textContent = completedGames;
+    document.getElementById("playingGames").textContent = playingGames;
+    document.getElementById("backlogGames").textContent = backlogGames;
+    document.getElementById("averageRating").textContent =
+        ratedGames.length > 0 ? `${averageRating.toFixed(1)}/10` : "Brak ocen";
+}
+
+
 function addGame() {
     const gameName = document.getElementById("gameName").value;
     const gameGenre = document.getElementById("gameGenre").value;
@@ -84,6 +117,7 @@ function renderGames(gameArray) {
         buttons.appendChild(editButton);
         buttons.appendChild(deleteButton);
     }
+    updateStatistics();
 }
 
 function loadScene(scene) {

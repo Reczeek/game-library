@@ -75,6 +75,16 @@
                 <option value="best">Best rated</option>
                 <option value="worst">Worst rated</option>
             </select>
+
+            <section id="statistics">
+                <h2>Statystyki biblioteki</h2>
+
+                <p>Wszystkie gry: <span id="totalGames">0</span></p>
+                <p>Ukończone: <span id="completedGames">0</span></p>
+                <p>W trakcie: <span id="playingGames">0</span></p>
+                <p>Do ogrania: <span id="backlogGames">0</span></p>
+                <p>Średnia ocena: <span id="averageRating">0/10</span></p>
+            </section>
             <div id="gameCards"></div>
             <button id="addGameSectionButton" onclick="loadScene(addGameSection)">Add game</button>
         </div>
